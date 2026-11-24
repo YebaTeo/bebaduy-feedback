@@ -1,0 +1,19 @@
+# Dependencies
+/node_modules
+
+# Next.js
+/.next/
+/out/
+
+# Local environment secrets
+.env*.local
+
+# Local feedback database file (keep folder via .gitkeep)
+/data/*.json
+/data/*.tmp
+
+# Logs & OS files
+npm-debug.log*
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts

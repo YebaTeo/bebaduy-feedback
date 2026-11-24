@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+:root {
+  /* Core BeBaduy Color Palette (from AppTheme.swift, LaunchSplashView.swift & Assets.xcassets) */
+  --bebaduy-action: #d05c00;
+  --bebaduy-action-hover: #df6708;
+  --bebaduy-action-border: #ff9e3d;
+  --bebaduy-orange: #f38e1a;
+  --bebaduy-gold: #f5a640;
+  --bebaduy-heading: #f7b266;
+  --bebaduy-cream: #fff6ed;
+  --bebaduy-ivory: #fcf7eb;
+  --bebaduy-paper: #faf7f0;
+  --bebaduy-taupe: #ccb0a1;
+  --bebaduy-sunlit: #fff5de;
+  --bebaduy-olive: #5b651d;
+  --bebaduy-olive-deep: #3f4714;
+  --bebaduy-leaf: #305e40;
+  --bebaduy-leaf-dark: #94c796;
+  --bebaduy-earth: #735438;
+  --bebaduy-soil: #2c1e14;
+  --bebaduy-soil-deep: #1e140d;
+
+  /* Custom motion curves (emil-design-eng / animate tokens) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Typography */
+  --font-rounded: ui-rounded, "SF Pro Rounded", "Nunito", "Hiragino Maru Gothic ProN", system-ui, -apple-system, sans-serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Mobile-native baseline */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  background-color: var(--bebaduy-soil-deep);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--bebaduy-cream);
+  background-color: var(--bebaduy-soil-deep);
+  min-height: 100svh;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-rounded {
+  font-family: var(--font-rounded);
+}
+
+/* Prevent iOS Safari auto-zoom on form fields */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+/* Instant tap response & no accidental selection on interactive controls */
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Signature BeBaduy Capsule CTA (mirrors LessonButton.swift) */
+.bebaduy-capsule-btn {
+  background-color: var(--bebaduy-action);
+  border: 1px solid var(--bebaduy-action-border);
+  color: #ffffff;
+  border-radius: 9999px;
+  box-shadow:
+    0 8px 24px -8px rgba(208, 92, 0, 0.55),
+    inset 0 1px 0 rgba(255, 224, 185, 0.25);
+  transition:
+    transform 150ms var(--ease-out),
+    background-color 160ms ease,
+    box-shadow 180ms ease,
+    opacity 160ms ease;
+}
+
+.bebaduy-capsule-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.bebaduy-capsule-btn:focus-visible {
+  outline: 2px solid var(--bebaduy-heading);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bebaduy-capsule-btn:hover:not(:disabled) {
+    background-color: var(--bebaduy-action-hover);
+    box-shadow:
+      0 12px 28px -8px rgba(208, 92, 0, 0.68),
+      inset 0 1px 0 rgba(255, 232, 200, 0.35);
+  }
+}
+
+/* Tactile press feedback for secondary controls & chips */
+.tactile-press {
+  transition:
+    transform 140ms var(--ease-out),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
+}
+
+.tactile-press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Gentle entrance animation (never starts at scale(0)) */
+@keyframes humaFadeLift {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-huma-enter {
+  animation: humaFadeLift 340ms var(--ease-out) both;
+}
+
+.animate-huma-enter-delay-1 {
+  animation: humaFadeLift 340ms var(--ease-out) 60ms both;
+}
+
+.animate-huma-enter-delay-2 {
+  animation: humaFadeLift 340ms var(--ease-out) 120ms both;
+}
+
+/* Respect reduced motion — keep gentle opacity fade, remove movement */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  @keyframes humaFadeOnly {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-huma-enter,
+  .animate-huma-enter-delay-1,
+  .animate-huma-enter-delay-2 {
+    animation: humaFadeOnly 200ms ease both;
+  }
+
+  .bebaduy-capsule-btn:active:not(:disabled),
+  .tactile-press:active:not(:disabled) {
+    transform: none;
+  }
+}

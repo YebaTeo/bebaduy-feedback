@@ -8,7 +8,8 @@ import { FeedbackFieldScene } from "./FeedbackFieldScene";
 import { LOCALE_STORAGE_KEY } from "@/lib/i18n";
 import type { FeedbackItem, Locale } from "@/lib/types";
 
-export function FeedbackFieldClient({ initialItems: items, localAddress }: { initialItems: FeedbackItem[]; localAddress?: string }) {
+export function FeedbackFieldClient({ initialItems, localAddress }: { initialItems: FeedbackItem[]; localAddress?: string }) {
+  const [items, setItems] = useState(initialItems);
   const [locale, setLocale] = useState<Locale>("id");
   const [entryUrl, setEntryUrl] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -27,6 +28,36 @@ export function FeedbackFieldClient({ initialItems: items, localAddress }: { ini
     }
     setEntryUrl(url.href);
   }, [localAddress]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let timer: number;
+
+    async function refresh() {
+      try {
+        const response = await fetch("/api/feedback", { cache: "no-store", signal: controller.signal });
+        if (response.status === 401) {
+          window.location.replace("/inbox");
+          return;
+        }
+        if (response.ok) {
+          const { items: latest }: { items: FeedbackItem[] } = await response.json();
+          setItems(current => current.length === latest.length && current.every((item, index) =>
+            item.id === latest[index].id && item.updatedAt === latest[index].updatedAt
+          ) ? current : latest);
+        }
+      } catch {
+        // Keep the current field visible while the connection recovers.
+      }
+      if (!controller.signal.aborted) timer = window.setTimeout(refresh, 3000);
+    }
+
+    timer = window.setTimeout(refresh, 3000);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, []);
 
   const selected = items.find((item) => item.id === selectedId) ?? null;
   const cursor = useRef(0);

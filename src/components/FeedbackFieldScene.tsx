@@ -1,5 +1,7 @@
 "use client";
 
+import { RiceRating } from "./RiceRating";
+
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -13,6 +15,7 @@ interface Props {
 }
 
 export function FeedbackFieldScene({ items, selectedId, locale, onSelect }: Props) {
+  const previousIds = useRef(new Set(items.map(item => item.id)));
   const story = items.find(item => item.id === selectedId);
   const active = useRef(selectedId);
   useEffect(() => { active.current = selectedId; }, [selectedId]);
@@ -89,6 +92,9 @@ export function FeedbackFieldScene({ items, selectedId, locale, onSelect }: Prop
     ground.receiveShadow = true;
     scene.add(ground);
 
+    const knownIds = previousIds.current;
+    previousIds.current = new Set(items.map(item => item.id));
+    const arrivals: THREE.Mesh[] = [];
     const markers = new Map<string, THREE.Mesh>();
     const raycastTargets: THREE.Mesh[] = [];
     const grainMaterial = new THREE.MeshStandardMaterial({ color: "#f5bb60", roughness: 0.65 });
@@ -138,6 +144,7 @@ export function FeedbackFieldScene({ items, selectedId, locale, onSelect }: Prop
         seed.userData.feedbackId = item.id;
         scene.add(seed);
         markers.set(item.id, seed);
+        if (!knownIds.has(item.id)) arrivals.push(seed);
         raycastTargets.push(seed);
       });
 
@@ -185,7 +192,8 @@ export function FeedbackFieldScene({ items, selectedId, locale, onSelect }: Prop
     let lastId: string | null | undefined;
     let lastAspect = 0;
     let moving = false;
-    let previousTime = performance.now();
+    const arrivalStart = performance.now();
+    let previousTime = arrivalStart;
     const stopFlight = () => { moving = false; };
     controls.addEventListener("start", stopFlight);
     let frame = 0;
@@ -194,6 +202,17 @@ export function FeedbackFieldScene({ items, selectedId, locale, onSelect }: Prop
       const now = performance.now();
       const dt = Math.min(0.1, (now - previousTime) / 1000);
       previousTime = now;
+      if (arrivals.length) {
+        const progress = reducedMotion.matches ? 1 : Math.min(1, (now - arrivalStart) / 1600);
+        for (const seed of arrivals) {
+          // Let each new seed fall into its own patch and bounce once.
+          const lift = progress < 0.65
+            ? 1 - (progress / 0.65) ** 2
+            : 0.18 * Math.sin(Math.PI * (progress - 0.65) / 0.35);
+          seed.position.y = -radius * 0.23 + lift * radius * 10;
+        }
+        if (progress === 1) arrivals.length = 0;
+      }
       if (active.current !== lastId || camera.aspect !== lastAspect) {
         lastId = active.current;
         lastAspect = camera.aspect;
@@ -246,7 +265,8 @@ export function FeedbackFieldScene({ items, selectedId, locale, onSelect }: Prop
       {story && <article key={story.id} className="field-story">
         <div className="story-byline"><img src="/brand/rice-emblem.png" alt="" width="34" height="34" />
           <div><strong>{story.name || (locale === "id" ? "Anonim" : "Anonymous")}</strong>
-</div>
+            <RiceRating value={story.rating} locale={locale} />
+          </div>
         </div>
         <blockquote tabIndex={0}>{story.message}</blockquote>
       </article>}

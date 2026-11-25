@@ -1,5 +1,7 @@
 "use client";
 
+import { RiceRating } from "./RiceRating";
+
 import { useEffect, useRef, useState } from "react";
 import { COPY } from "@/lib/i18n";
 import type { Locale } from "@/lib/types";
@@ -9,9 +11,8 @@ export function FeedbackForm({ locale }: { locale: Locale }) {
   const id = locale === "id";
   const [stage, setStage] = useState<"ready" | "writing" | "sent">("ready");
   const [message, setMessage] = useState("");
+  const [rating, setRating] = useState(0);
   const [name, setName] = useState("");
-  const [rating, setRating] = useState(5);
-  const [receipt, setReceipt] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
@@ -24,7 +25,7 @@ export function FeedbackForm({ locale }: { locale: Locale }) {
       setStage("ready");
       setMessage("");
       setName("");
-      setRating(5);
+      setRating(0);
     }, 9000);
     return () => window.clearTimeout(timer);
   }, [stage]);
@@ -33,6 +34,10 @@ export function FeedbackForm({ locale }: { locale: Locale }) {
     if (pending.current) return;
     if (message.trim().length < 5) {
       setError(COPY[locale].errorMinMessage);
+      return;
+    }
+    if (rating === 0) {
+      setError(id ? "Pilih jumlah bulir padi untuk memberi penilaian." : "Choose a rice grain to rate your experience.");
       return;
     }
     pending.current = true;
@@ -44,8 +49,7 @@ export function FeedbackForm({ locale }: { locale: Locale }) {
         body: JSON.stringify({ message: message.trim(), name: name.trim() || undefined, rating, locale }),
       });
       const data = await response.json();
-      if (!response.ok || !data.referenceCode) throw new Error();
-      setReceipt(data.referenceCode);
+      if (!response.ok || data.ok !== true) throw new Error();
       setStage("sent");
     } catch {
       setError(COPY[locale].errorGeneric);
@@ -62,20 +66,18 @@ export function FeedbackForm({ locale }: { locale: Locale }) {
     </> : <>
       <div className={'seed-speech mx-auto max-w-sm text-left ' + (stage === "sent" ? "seed-sent" : "")}>
         {stage === "sent" ? <div role="status">
+          <p className="mb-2 font-bold">{id ? "Terima kasih! Masukanmu berhasil dikirim." : "Thank you! Your feedback was sent successfully."}</p>
           <p className="max-h-40 overflow-auto whitespace-pre-wrap break-words">{message}</p>
-          <small>{id ? "Tersimpan" : "Saved"} · {receipt}</small>
         </div> : <>
           <label htmlFor="seed-message" className="font-bold">{id ? "Apa yang ingin kamu sampaikan?" : "What would you like to share?"}</label>
           <textarea ref={editor} id="seed-message" rows={3} maxLength={2000} readOnly={busy}
             value={message} onChange={event => setMessage(event.target.value)}
-            className="my-2 block w-full resize-none bg-transparent" />
-          <label htmlFor="seed-name" className="block text-sm">{id ? "Nama (opsional)" : "Name (optional)"}</label>
+            className="mt-2 mb-4 block w-full resize-none rounded-xl border-2 border-[#94744e] bg-[#fffaf1] px-3 py-2 focus:border-[#75451c] focus:outline-2 focus:outline-offset-2 focus:outline-[#75451c]" />
+          <RiceRating value={rating} locale={locale} onChange={value => { setRating(value); setError(""); }} disabled={busy} />
+          <label htmlFor="seed-name" className="mt-4 block text-sm">{id ? "Nama (opsional)" : "Name (optional)"}</label>
           <input id="seed-name" name="name" autoComplete="name" maxLength={80}
             readOnly={busy} value={name} onChange={event => setName(event.target.value)}
-            className="mt-1 mb-3 block w-full rounded-lg border border-[#96693055] bg-transparent px-3 py-2" />
-          <label className="text-sm">{id ? "Penilaian" : "Rating"} <select disabled={busy} value={rating} onChange={event => setRating(Number(event.target.value))}>
-            {[1,2,3,4,5].map(value => <option key={value} value={value}>{value}/5</option>)}
-          </select></label>
+            className="mt-1 block w-full rounded-lg border border-[#96693055] bg-transparent px-3 py-2" />
           <button type="button" disabled={busy} onClick={send}
             className="bebaduy-capsule-btn mt-4 block w-full rounded-full px-4 py-3 font-bold disabled:opacity-60">
             {busy ? (id ? "Mengirim…" : "Sending…") : (id ? "Kirim" : "Send")}

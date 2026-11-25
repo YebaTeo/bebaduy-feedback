@@ -11,8 +11,7 @@ Designed directly from BeBaduy's visual language: sunlit morning Kanekes hills (
 - **Public Feedback Sanctuary (`/`):**
   - Bilingual switcher (**ID / EN**) persisted in `localStorage`.
   - 5-point experience rating with warm descriptive captions.
-  - Topic tags (`Bug / Kendala`, `Saran Fitur`, `Cerita & Budaya`, `Sensor & 3D`, `Apresiasi`, `Lainnya`).
-  - Interactive BeBaduy chapter selector synced with the app's 6 *Ngahuma* stages (`Narawas`, `Ngaseuk`, `Ngored`, `Mipit`, `Ngalantai`, `Ngaleuitkeun`) plus `Koleksi` and `Umum`.
+  - Drag a rice seed into the soil to open the feedback form, or plant it with the keyboard.
   - Optional sender name, email, device/iOS info, and app version.
   - Anti-spam honeypot + per-IP rate limiting + unique `HUMA-XXXX` receipt code.
 - **Password-Protected Maintainer Inbox (`/inbox`):**
@@ -21,6 +20,7 @@ Designed directly from BeBaduy's visual language: sunlit morning Kanekes hills (
   - Search and filter by status, category, and chapter.
   - Inline status triage (`new`, `reviewed`, `resolved`, `archived`), internal maintainer notes, and two-step delete.
   - One-click **Export CSV** (Excel UTF-8 BOM + spreadsheet formula-injection safe) and **Export JSON**.
+  - **Field of Voices (`/inbox/field`):** an admin-only Three.js map of every feedback entry, in a shared field. Rotate and zoom the field, select a seed to read its message, or use the accessible list. Search the field by message, reference code, or sender.
 - **Pluggable Storage (`src/lib/storage/`):**
   - Works out of the box with atomic local JSON storage (`data/feedback.json`).
   - Automatically upgrades to **Supabase** as soon as `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured.

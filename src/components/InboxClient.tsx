@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import Link from "next/link";
 import {
   AlertCircle,
   Check,
@@ -13,6 +14,7 @@ import {
   Lock,
   LogOut,
   Mail,
+  Map,
   RefreshCw,
   Search,
   Smartphone,
@@ -458,6 +460,13 @@ export function InboxClient({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/inbox/field"
+              className="tactile-press inline-flex items-center gap-1.5 rounded-full border border-[#5b651d]/30 bg-[#edf2df] px-3.5 py-2 text-xs font-semibold text-[#3f4714] hover:bg-[#e1ebce]"
+            >
+              <Map className="h-3.5 w-3.5" />
+              {locale === "id" ? "Peta Suara Huma" : "Field of Voices"}
+            </Link>
             <button
               type="button"
               onClick={() => void loadItems()}

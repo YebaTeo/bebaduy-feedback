@@ -15,7 +15,7 @@ const optionalTrimmedString = (max: number) =>
 
 export const createFeedbackSchema = z.object({
   rating: z.coerce.number().int().min(1).max(5),
-  category: z.enum(FEEDBACK_CATEGORIES),
+  category: z.enum(FEEDBACK_CATEGORIES).default("other"),
   chapter: z.enum(BEBADUY_CHAPTERS).default("general"),
   message: z.string().trim().min(5).max(2000),
   name: optionalTrimmedString(80),

@@ -10,6 +10,7 @@ import type { FeedbackItem, Locale } from "@/lib/types";
 
 export function FeedbackFieldClient({ initialItems, localAddress }: { initialItems: FeedbackItem[]; localAddress?: string }) {
   const [items, setItems] = useState(initialItems);
+  const knownIds = useRef(new Set(initialItems.map(item => item.id)));
   const [locale, setLocale] = useState<Locale>("id");
   const [entryUrl, setEntryUrl] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -42,6 +43,10 @@ export function FeedbackFieldClient({ initialItems, localAddress }: { initialIte
         }
         if (response.ok) {
           const { items: latest }: { items: FeedbackItem[] } = await response.json();
+          if (controller.signal.aborted) return;
+          const newest = latest.find(item => !knownIds.current.has(item.id));
+          knownIds.current = new Set(latest.map(item => item.id));
+          if (newest) setSelectedId(newest.id);
           setItems(current => current.length === latest.length && current.every((item, index) =>
             item.id === latest[index].id && item.updatedAt === latest[index].updatedAt
           ) ? current : latest);

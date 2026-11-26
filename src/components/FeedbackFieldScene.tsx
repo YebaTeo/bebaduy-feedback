@@ -148,6 +148,13 @@ export function FeedbackFieldScene({ items, selectedId, locale, onSelect }: Prop
         raycastTargets.push(seed);
       });
 
+    const highlight = new THREE.Mesh(
+      new THREE.RingGeometry(radius * 1.8, radius * 2.1, 48),
+      new THREE.MeshBasicMaterial({ color: "#ffda76", depthWrite: false })
+    );
+    highlight.rotation.x = -Math.PI / 2;
+    scene.add(highlight);
+
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     let pointerDown: { x: number; y: number } | null = null;
@@ -219,8 +226,10 @@ export function FeedbackFieldScene({ items, selectedId, locale, onSelect }: Prop
         const marker = lastId ? markers.get(lastId) : undefined;
         const distance = marker ? 3.8 : Math.max(16, 20 / camera.aspect);
         focalPoint.set(0, 0, 0);
+        highlight.visible = Boolean(marker);
         if (marker) {
-          focalPoint.copy(marker.position);
+          highlight.position.set(marker.position.x, 0.012, marker.position.z);
+          focalPoint.set(marker.position.x, 0, marker.position.z);
           focalPoint.addScaledVector(right, distance * camera.aspect * 0.19);
         }
         destination.copy(focalPoint).addScaledVector(direction, distance);

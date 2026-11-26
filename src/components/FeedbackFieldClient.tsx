@@ -65,15 +65,20 @@ export function FeedbackFieldClient({ initialItems, localAddress }: { initialIte
   }, []);
 
   const selected = items.find((item) => item.id === selectedId) ?? null;
-  const cursor = useRef(0);
+  const nextRotationId = useRef(initialItems[0]?.id);
+
+  function selectInRotation(index: number) {
+    nextRotationId.current = items[(index + 1) % items.length].id;
+    setSelectedId(items[index].id);
+  }
   useEffect(() => {
     if (!items.length) return;
     const timer = window.setTimeout(() => {
       if (selected) {
-        cursor.current = items.indexOf(selected) + 1;
         setSelectedId(null);
       } else {
-        setSelectedId(items[cursor.current % items.length].id);
+        const index = items.findIndex(item => item.id === nextRotationId.current);
+        selectInRotation(Math.max(0, index));
       }
     }, selected ? Math.min(30000, 5000 + selected.message.length * 45) : 3200);
     return () => window.clearTimeout(timer);
@@ -82,7 +87,10 @@ export function FeedbackFieldClient({ initialItems, localAddress }: { initialIte
   return (
     <main className="voice-landscape">
       <section className="field-stage">
-        <FeedbackFieldScene items={items} selectedId={selected?.id ?? null} locale={locale} onSelect={setSelectedId} />
+        <FeedbackFieldScene items={items} selectedId={selected?.id ?? null} locale={locale} onSelect={id => {
+          const index = items.findIndex(item => item.id === id);
+          if (index >= 0) selectInRotation(index);
+        }} />
         <Link href="/inbox" aria-label={locale === "id" ? "Kembali ke kotak masuk" : "Back to inbox"}
           className="field-control absolute left-4 top-[max(1rem,env(safe-area-inset-top))]">
           <ArrowLeft size={19} />
